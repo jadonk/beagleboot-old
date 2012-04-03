@@ -1,3 +1,6 @@
 [submodule "lib/libusb"]
 	path = lib/libusb
 	url = git://git.libusb.org/libusb.git
+[submodule "lib/parted"]
+	path = lib/parted
+	url = git://git.savannah.gnu.org/parted.git
