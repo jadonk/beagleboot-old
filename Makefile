@@ -1,39 +1,16 @@
 CC=gcc
-CFLAGS=-c -Wall
+CFLAGS=-c -Wall $(shell pkg-config --cflags libusb-1.0)
+LDFLAGS=$(shell pkg-config --libs libusb-1.0)
 OBJ_FOLDER=obj
 all: boot
 
 boot: main.o bootp.o udp.o ipv4.o ether2.o rndis.o utils.o arp.o tftp.o
 	mkdir -p bin
-	$(CC) -I/usr/include/libusb-1.0 main.o ipv4.o bootp.o udp.o ether2.o rndis.o utils.o arp.o tftp.o -lusb-1.0 -o bin/boot
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o bin/boot
 
-main.o: main.c
-	$(CC) $(CFLAGS) -I/usr/include/libusb-1.0 -lusb-1.0 main.c
-
-bootp.o: bootp.c
-	$(CC) $(CFLAGS) bootp.c
-
-udp.o: udp.c
-	$(CC) $(CFLAGS) udp.c
-
-ipv4.o: ipv4.c
-	$(CC) $(CFLAGS) ipv4.c
-
-ether2.o: ether2.c
-	$(CC) $(CFLAGS) ether2.c
-
-rndis.o: rndis.c
-	$(CC) $(CFLAGS) rndis.c
-
-utils.o: utils.c
-	$(CC) $(CFLAGS) utils.c
-
-arp.o: arp.c
-	$(CC) $(CFLAGS) arp.c
-
-tftp.o: tftp.c
-	$(CC) $(CFLAGS) tftp.c
+.c.o:
+	$(CC) $(CFLAGS) $<
 
 clean:
 	rm -rf *o bin/boot
-	
+
