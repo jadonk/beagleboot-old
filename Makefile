@@ -6,7 +6,7 @@ all: boot
 
 boot: main.o bootp.o udp.o ipv4.o ether2.o rndis.o utils.o arp.o tftp.o
 	mkdir -p bin
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o bin/boot
+	$(CC) $(LDFLAGS) $^ -o bin/boot
 
 .c.o:
 	$(CC) $(CFLAGS) $<
