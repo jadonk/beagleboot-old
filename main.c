@@ -34,9 +34,7 @@
 #include "utils.h"
 
 void show_usage() {
-    printf("Use like:\nboot emmc/card image\n");
-    printf("emmc / card -- to choose if you want to flash the eMMC or a uSD card\n");
-    printf("image -- the name of the image you want to flash. Needs to be either .xz or .zip format\n");
+    printf("Use like:\nboot <spl> [<uboot>] [<fit>] image\n");
 }
 
 int main(int argc, const char * argv[]) {
@@ -66,11 +64,12 @@ int main(int argc, const char * argv[]) {
     int r;
     ssize_t cnt;
 
-    if (argc != 3) {
+    if (argc < 2) {
         show_usage();
         exit(1);
     }
 
+    //TODO
     if (strcmp(argv[1], "emmc") == 0) {
         flash_type = "nsd";
     }
@@ -168,10 +167,12 @@ int main(int argc, const char * argv[]) {
     eth2->h_proto = htons(ETHIPP);
     int blk_number = 1;
 
-    send = fopen("spl" ,"rb");
+    printf("Loading %s as minimal bootloader via ROM bootloader TFTP\n"; argv[1]);
+    send = fopen(argv[1] ,"rb");
 
     if (send == NULL) {
         perror("Something wrong!\n");
+        exit(1);
     }
 
     char *reader = (char*)malloc(512 * sizeof(char));
@@ -213,6 +214,11 @@ int main(int argc, const char * argv[]) {
 
     fclose(send);
     libusb_close(dev_handle);
+    printf("Finished loading %s\n", argv[1]);
+    if(argc < 3) {
+        exit(0);
+    }
+
     sleep(1);
 
     cnt = libusb_get_device_list(ctx, &devs);
@@ -288,10 +294,12 @@ int main(int argc, const char * argv[]) {
     eth2->h_proto = htons(ETHIPP);
 
     blk_number = 1;
-    send = fopen("uboot", "rb");
+    printf("Loading %s as full bootloader via SPL TFTP\n"; argv[2]);
+    send = fopen(argv[2], "rb");
 
     if (send == NULL) {
         perror("Something wrong!\n");
+        exit(1);
     }
 
     memset(reader, 0, 512);
@@ -337,6 +345,12 @@ int main(int argc, const char * argv[]) {
         exit(1);
     }
 libusb_close(dev_handle);
+
+    printf("Finished loading %s\n", argv[2]);
+    if(argc < 4) {
+        exit(0);
+    }
+
     sleep(5);
 
     cnt = libusb_get_device_list(ctx, &devs);
@@ -377,7 +391,8 @@ libusb_close(dev_handle);
     
     eth2->h_proto = htons(ETHIPP);
     blk_number = 1;
-    send = fopen("fit", "rb");
+    printf("Loading %s as initial boot image via bootloader TFTP\n"; argv[3]);
+    send = fopen(argv[3], "rb");
 
     if (send == NULL) {
         perror("Something wrong!\n");
@@ -421,6 +436,11 @@ libusb_close(dev_handle);
     }
     libusb_close(dev_handle);
 
+    printf("Finished loading %s\n", argv[3]);
+    if(argc < 5) {
+        exit(0);
+    }
+
     sleep(10);
 
     cnt = libusb_get_device_list(ctx, &devs);
@@ -450,7 +470,8 @@ libusb_close(dev_handle);
     r = libusb_bulk_transfer(dev_handle, (1 | LIBUSB_ENDPOINT_OUT), 
                             (unsigned char*)argv[2], 12, &actual, 0);
 
-    send = fopen(argv[2], "rb");
+    printf("Loading %s as image to flash via kernel virtual serial\n"; argv[4]);
+    send = fopen(argv[4], "rb");
 
     if (send == NULL) {
         perror("Something wrong!\n");
